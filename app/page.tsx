@@ -188,6 +188,13 @@ export default function Home() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [importMessage, setImportMessage] = useState("");
+  const [impactScenario, setImpactScenario] = useState({
+  managers: 10,
+  hoursSavedPerWeek: 10,
+  hourlyCost: 50,
+  pipelineSurfaced: 50000,
+  revenueAtRisk: 18000,
+});
 
   function loadDemoData() {
     setMeeting(demoMeeting);
@@ -518,6 +525,13 @@ async function handleFileUpload(
             )}
           </div>
         </section>
+
+        {result && (
+          <BusinessCaseCalculator
+            scenario={impactScenario}
+            onScenarioChange={setImpactScenario}
+          />
+        )}
 
         {result && (
           <ExecutiveBrief
@@ -1283,6 +1297,186 @@ function BusinessMetric({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
       <p className="text-sm font-semibold text-slate-400">{label}</p>
       <p className="mt-3 whitespace-nowrap text-3xl font-black tracking-tight text-cyan-300">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function BusinessCaseCalculator({
+  scenario,
+  onScenarioChange,
+}: {
+  scenario: {
+    managers: number;
+    hoursSavedPerWeek: number;
+    hourlyCost: number;
+    pipelineSurfaced: number;
+    revenueAtRisk: number;
+  };
+  onScenarioChange: (value: {
+    managers: number;
+    hoursSavedPerWeek: number;
+    hourlyCost: number;
+    pipelineSurfaced: number;
+    revenueAtRisk: number;
+  }) => void;
+}) {
+  const annualHoursSaved =
+    scenario.managers * scenario.hoursSavedPerWeek * 52;
+
+  const estimatedSavings = annualHoursSaved * scenario.hourlyCost;
+
+  const totalEstimatedValue =
+    estimatedSavings + scenario.pipelineSurfaced + scenario.revenueAtRisk;
+
+  function updateField(
+    field:
+      | "managers"
+      | "hoursSavedPerWeek"
+      | "hourlyCost"
+      | "pipelineSurfaced"
+      | "revenueAtRisk",
+    value: number
+  ) {
+    onScenarioChange({
+      ...scenario,
+      [field]: Number.isNaN(value) ? 0 : value,
+    });
+  }
+
+  return (
+    <section className="mt-6 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.05] p-6 shadow-2xl backdrop-blur-xl">
+      <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-[0.3em] text-cyan-300">
+            Business Case Calculator
+          </p>
+          <h2 className="text-3xl font-black">
+            Estimate time saved, cost reduction and revenue impact
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+            Adjust the assumptions to show how OpsPulse AI could translate
+            operational clarity into measurable business value.
+          </p>
+        </div>
+
+        <span className="w-fit rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-bold text-cyan-200">
+          Estimated impact
+        </span>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
+          <p className="mb-4 text-sm font-bold text-cyan-300">
+            Demo Assumptions
+          </p>
+
+          <div className="space-y-4">
+            <CalculatorInput
+              label="Managers"
+              value={scenario.managers}
+              onChange={(value) => updateField("managers", value)}
+            />
+
+            <CalculatorInput
+              label="Hours saved per manager / week"
+              value={scenario.hoursSavedPerWeek}
+              onChange={(value) => updateField("hoursSavedPerWeek", value)}
+            />
+
+            <CalculatorInput
+              label="Hourly management cost (€)"
+              value={scenario.hourlyCost}
+              onChange={(value) => updateField("hourlyCost", value)}
+            />
+
+            <CalculatorInput
+              label="Pipeline surfaced (€)"
+              value={scenario.pipelineSurfaced}
+              onChange={(value) => updateField("pipelineSurfaced", value)}
+            />
+
+            <CalculatorInput
+              label="Revenue at risk detected (€)"
+              value={scenario.revenueAtRisk}
+              onChange={(value) => updateField("revenueAtRisk", value)}
+            />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
+          <p className="mb-4 text-sm font-bold text-emerald-300">
+            Estimated Business Value
+          </p>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ValueCard
+              label="Annual Hours Saved"
+              value={`${annualHoursSaved.toLocaleString()}h`}
+            />
+            <ValueCard
+              label="Estimated Savings"
+              value={`€${estimatedSavings.toLocaleString()}`}
+            />
+            <ValueCard
+              label="Pipeline Surfaced"
+              value={`€${scenario.pipelineSurfaced.toLocaleString()}`}
+            />
+            <ValueCard
+              label="Revenue Protected"
+              value={`€${scenario.revenueAtRisk.toLocaleString()}`}
+            />
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.08] p-5">
+            <p className="text-sm font-semibold text-emerald-200">
+              Total Estimated Value
+            </p>
+            <p className="mt-2 text-4xl font-black text-emerald-300">
+              €{totalEstimatedValue.toLocaleString()}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-400">
+              This is a demo projection based on editable assumptions. It is not
+              a guaranteed result, but it shows how the product can connect
+              operational clarity to cost reduction and revenue enablement.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CalculatorInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm font-semibold text-slate-400">
+        {label}
+      </span>
+      <input
+        type="number"
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="w-full rounded-xl border border-white/10 bg-[#050713] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-300/60 focus:ring-4 focus:ring-cyan-300/10"
+      />
+    </label>
+  );
+}
+
+function ValueCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+      <p className="text-sm text-slate-500">{label}</p>
+      <p className="mt-2 whitespace-nowrap text-2xl font-black text-cyan-300">
         {value}
       </p>
     </div>
