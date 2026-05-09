@@ -445,7 +445,7 @@ async function handleFileUpload(
         )}
 
         <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-white/[0.05] p-5 shadow-2xl backdrop-blur-xl">
+          <div className="sticky top-6 self-start rounded-[2rem] border border-white/10 bg-white/[0.05] p-5 shadow-2xl backdrop-blur-xl">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold">Input Hub</h2>
