@@ -22,92 +22,86 @@ Support: Multiple users are reporting login failures after the latest release.
 Sales: Enterprise prospect is interested in a 50-seat annual plan if SSO is available.
 Design: Waiting for product copy before finalizing onboarding screens.`;
 
-const mockResults = {
-  summary:
-    "The team is focused on launching the onboarding flow, resolving login issues, and following up on an enterprise SSO opportunity.",
-  decisions: [
-    "Login issues are now a high-priority investigation.",
-    "The onboarding flow should be completed by Friday.",
-    "The enterprise SSO request should be treated as a sales and product opportunity.",
-  ],
-  tasks: [
-    {
-      title: "Investigate login issue",
-      owner: "Alex",
-      team: "Engineering",
-      dueDate: "Wednesday",
-      priority: "High",
-      status: "Open",
-    },
-    {
-      title: "Finish onboarding design",
-      owner: "Nina",
-      team: "Design",
-      dueDate: "Thursday",
-      priority: "High",
-      status: "Blocked",
-    },
-    {
-      title: "Finalize onboarding copy",
-      owner: "Sarah",
-      team: "Product",
-      dueDate: "Wednesday",
-      priority: "Medium",
-      status: "At risk",
-    },
-    {
-      title: "Follow up on enterprise SSO request",
-      owner: "Daniel",
-      team: "Sales",
-      dueDate: "Friday",
-      priority: "High",
-      status: "Open",
-    },
-  ],
-  risks: [
-    "Onboarding launch may be delayed because design is blocked by missing product copy.",
-    "Login issues are affecting multiple users and may damage customer trust.",
-    "The enterprise SSO opportunity may be lost without clear sales follow-up.",
-  ],
-  blockers: [
-    "Engineering is waiting for final design.",
-    "Design is waiting for final product copy.",
-  ],
-  feedbackCategories: [
-    { category: "Bug", count: 2 },
-    { category: "Feature Request", count: 1 },
-    { category: "Complaint", count: 1 },
-    { category: "Sales Opportunity", count: 2 },
-  ],
+type Task = {
+  title: string;
+  owner: string;
+  team: string;
+  dueDate: string;
+  priority: string;
+  status: string;
+};
+
+type FeedbackCategory = {
+  category: string;
+  count: number;
+};
+
+type AnalysisResult = {
+  summary: string;
+  decisions: string[];
+  tasks: Task[];
+  risks: string[];
+  blockers: string[];
+  feedbackCategories: FeedbackCategory[];
+  recommendedActions: string[];
 };
 
 export default function Home() {
-const [meeting, setMeeting] = useState("");
-const [feedback, setFeedback] = useState("");
-const [updates, setUpdates] = useState("");
-const [hasResults, setHasResults] = useState(false);
+  const [meeting, setMeeting] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [updates, setUpdates] = useState("");
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   function loadDemoData() {
-  setMeeting(demoMeeting);
-  setFeedback(demoFeedback);
-  setUpdates(demoUpdates);
-  setHasResults(false);
-}
-
-  function analyzeData() {
-    setHasResults(true);
+    setMeeting(demoMeeting);
+    setFeedback(demoFeedback);
+    setUpdates(demoUpdates);
+    setResult(null);
+    setError("");
   }
 
-  const activeTasks = mockResults.tasks.length;
-  const blockedTasks = mockResults.tasks.filter(
-    (task) => task.status === "Blocked"
-  ).length;
-  const atRiskTasks = mockResults.tasks.filter(
-    (task) => task.status === "At risk"
-  ).length;
-  const urgentIssues = mockResults.feedbackCategories.find(
-    (item) => item.category === "Bug"
-  )?.count;
+  async function analyzeData() {
+    setIsLoading(true);
+    setError("");
+    setResult(null);
+
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          meetingTranscript: meeting,
+          supportMessages: feedback,
+          teamUpdates: updates,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to analyze inputs.");
+      }
+
+      setResult(data);
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong while analyzing the inputs.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const activeTasks = result?.tasks?.length ?? 0;
+  const blockedTasks =
+    result?.tasks?.filter((task) => task.status === "Blocked").length ?? 0;
+  const atRiskTasks =
+    result?.tasks?.filter((task) => task.status === "At risk").length ?? 0;
+  const customerSignals =
+    result?.feedbackCategories?.reduce((sum, item) => sum + item.count, 0) ?? 0;
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -144,7 +138,7 @@ const [hasResults, setHasResults] = useState(false);
               value={meeting}
               onChange={(event) => setMeeting(event.target.value)}
               placeholder="Paste meeting transcript here..."
-              className="mb-4 h-44 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
+              className="mb-4 h-40 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
             />
 
             <label className="mb-2 block text-sm font-medium text-slate-300">
@@ -154,10 +148,10 @@ const [hasResults, setHasResults] = useState(false);
               value={feedback}
               onChange={(event) => setFeedback(event.target.value)}
               placeholder="Paste support messages here..."
-              className="h-44 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
+              className="mb-4 h-40 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 outline-none focus:border-cyan-500"
             />
 
-            <label className="mb-2 mt-4 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-slate-300">
               Team updates
             </label>
             <textarea
@@ -169,17 +163,24 @@ const [hasResults, setHasResults] = useState(false);
 
             <button
               onClick={analyzeData}
-              className="mt-5 w-full rounded-xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950 hover:bg-cyan-400"
+              disabled={isLoading}
+              className="mt-5 w-full rounded-xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300"
             >
-              Analyze with OpsPulse AI
+              {isLoading ? "Analyzing..." : "Analyze with OpsPulse AI"}
             </button>
+
+            {error && (
+              <p className="mt-3 rounded-xl border border-red-900 bg-red-950 p-3 text-sm text-red-300">
+                {error}
+              </p>
+            )}
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <h2 className="mb-4 text-xl font-semibold">Management Dashboard</h2>
 
-            {!hasResults ? (
-              <div className="flex h-[420px] items-center justify-center rounded-xl border border-dashed border-slate-700 text-center text-slate-500">
+            {!result ? (
+              <div className="flex h-[520px] items-center justify-center rounded-xl border border-dashed border-slate-700 text-center text-slate-500">
                 Load demo data and click Analyze to generate insights.
               </div>
             ) : (
@@ -188,24 +189,22 @@ const [hasResults, setHasResults] = useState(false);
                   <MetricCard label="Active Tasks" value={activeTasks} />
                   <MetricCard label="Blocked Tasks" value={blockedTasks} />
                   <MetricCard label="At Risk Tasks" value={atRiskTasks} />
-                  <MetricCard label="Bug Reports" value={urgentIssues ?? 0} />
+                  <MetricCard label="Customer Signals" value={customerSignals} />
                 </div>
 
                 <div className="rounded-xl bg-slate-950 p-4">
                   <h3 className="mb-2 font-semibold text-slate-200">
                     Executive Summary
                   </h3>
-                  <p className="text-sm text-slate-400">
-                    {mockResults.summary}
-                  </p>
+                  <p className="text-sm text-slate-400">{result.summary}</p>
                 </div>
 
                 <div className="rounded-xl bg-slate-950 p-4">
                   <h3 className="mb-3 font-semibold text-slate-200">
-                    Top 3 Risks This Week
+                    Top Risks This Week
                   </h3>
                   <ul className="space-y-2 text-sm text-slate-400">
-                    {mockResults.risks.map((risk) => (
+                    {result.risks.slice(0, 3).map((risk) => (
                       <li key={risk}>• {risk}</li>
                     ))}
                   </ul>
@@ -216,9 +215,9 @@ const [hasResults, setHasResults] = useState(false);
                     Recommended Actions
                   </h3>
                   <ul className="space-y-2 text-sm text-slate-400">
-                    <li>• Assign one engineer to investigate login issues today.</li>
-                    <li>• Finalize onboarding copy before design handoff.</li>
-                    <li>• Create Sales follow-up for enterprise SSO request.</li>
+                    {result.recommendedActions.map((action) => (
+                      <li key={action}>• {action}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -226,12 +225,12 @@ const [hasResults, setHasResults] = useState(false);
           </div>
         </div>
 
-        {hasResults && (
+        {result && (
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
               <h2 className="mb-4 text-xl font-semibold">Decisions</h2>
               <ul className="space-y-3 text-sm text-slate-400">
-                {mockResults.decisions.map((decision) => (
+                {result.decisions.map((decision) => (
                   <li key={decision}>• {decision}</li>
                 ))}
               </ul>
@@ -247,16 +246,22 @@ const [hasResults, setHasResults] = useState(false);
                       <th className="p-3">Owner</th>
                       <th className="p-3">Team</th>
                       <th className="p-3">Due</th>
+                      <th className="p-3">Priority</th>
                       <th className="p-3">Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {mockResults.tasks.map((task) => (
+                    {result.tasks.map((task) => (
                       <tr key={task.title} className="border-t border-slate-800">
                         <td className="p-3 text-slate-200">{task.title}</td>
                         <td className="p-3 text-slate-400">{task.owner}</td>
                         <td className="p-3 text-slate-400">{task.team}</td>
                         <td className="p-3 text-slate-400">{task.dueDate}</td>
+                        <td className="p-3">
+                          <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-cyan-300">
+                            {task.priority}
+                          </span>
+                        </td>
                         <td className="p-3">
                           <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-cyan-300">
                             {task.status}
@@ -266,6 +271,32 @@ const [hasResults, setHasResults] = useState(false);
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+              <h2 className="mb-4 text-xl font-semibold">Blockers</h2>
+              <ul className="space-y-3 text-sm text-slate-400">
+                {result.blockers.map((blocker) => (
+                  <li key={blocker}>• {blocker}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 lg:col-span-2">
+              <h2 className="mb-4 text-xl font-semibold">Feedback Categories</h2>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {result.feedbackCategories.map((item) => (
+                  <div
+                    key={item.category}
+                    className="rounded-xl bg-slate-950 p-4"
+                  >
+                    <p className="text-sm text-slate-500">{item.category}</p>
+                    <p className="mt-2 text-2xl font-bold text-cyan-400">
+                      {item.count}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
