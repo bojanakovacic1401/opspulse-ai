@@ -22,6 +22,30 @@ Support: Multiple users are reporting login failures after the latest release.
 Sales: Enterprise prospect is interested in a 50-seat annual plan if SSO is available.
 Design: Waiting for product copy before finalizing onboarding screens.`;
 
+const slackDemo = `#support
+Customer A: I cannot log in after the latest update.
+Customer B: The dashboard is very slow when loading reports.
+Customer C: We need SSO before buying the enterprise plan.
+Customer D: Login keeps failing for multiple team members.
+Customer E: We are interested in a 50-seat enterprise plan if SSO is available.`;
+
+const zoomDemo = `Zoom Meeting Transcript
+
+Sarah: We need to finish the new onboarding flow by Friday.
+Alex: I can take the frontend work, but I am waiting for the final design from Nina.
+Nina: Design is delayed because we still do not have the final product copy.
+Daniel: Support is reporting that multiple users are having login issues after the latest update.
+Sarah: The login issue is now a priority. Alex, please investigate it by Wednesday.
+Daniel: We also have an enterprise customer asking for SSO before they commit to the annual plan.`;
+
+const jiraDemo = `Jira Sprint Update
+
+Engineering: Onboarding frontend is in progress. Blocked by final design.
+Design: Onboarding screens are blocked by missing product copy.
+Product: Final onboarding copy is still not ready.
+Support: Login issues are increasing after the latest release.
+Sales: Enterprise SSO opportunity needs follow-up this week.`;
+
 type Task = {
   title: string;
   owner: string;
@@ -150,6 +174,27 @@ export default function Home() {
     setCopied(false);
   }
 
+  function importSlackMessages() {
+  setFeedback(slackDemo);
+  setResult(null);
+  setError("");
+  setCopied(false);
+}
+
+function importZoomTranscript() {
+  setMeeting(zoomDemo);
+  setResult(null);
+  setError("");
+  setCopied(false);
+}
+
+function importJiraUpdates() {
+  setUpdates(jiraDemo);
+  setResult(null);
+  setError("");
+  setCopied(false);
+}
+
   async function analyzeData() {
     setIsLoading(true);
     setError("");
@@ -180,7 +225,7 @@ export default function Home() {
       console.error(err);
       setResult(fallbackResult);
       setError(
-        "Live AI analysis is unavailable because API quota is exceeded. Showing demo analysis instead."
+        "Demo mode active — showing pre-generated AI analysis. Add API credits to enable live AI analysis."
       );
     } finally {
       setIsLoading(false);
@@ -230,7 +275,7 @@ export default function Home() {
                 OPSPULSE AI
               </p>
               <p className="text-xs text-slate-400">
-                Operational intelligence dashboard
+                Operational & revenue intelligence dashboard
               </p>
             </div>
           </div>
@@ -251,16 +296,16 @@ export default function Home() {
               From workplace noise to actionable insight
             </div>
 
-            <h1 className="max-w-4xl text-5xl font-black tracking-tight text-white md:text-7xl">
-              Company work intelligence,
-              <span className="block bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-violet-300 bg-clip-text text-transparent">
-                powered by AI.
+            <h1 className="max-w-4xl pb-3 text-4xl font-black leading-[1.1] tracking-tight text-white md:text-6xl md:leading-[1.1]">
+              Operational & revenue intelligence
+              <span className="block pb-3 bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-violet-300 bg-clip-text text-transparent">
+                from workplace noise.
               </span>
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-              OpsPulse AI turns meetings, support messages and team updates into
-              clear tasks, blockers, risks and executive insights.
+              OpsPulse AI turns meetings, support messages and team updates into tasks,
+              blockers, churn risks, sales opportunities and executive briefs.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -288,6 +333,12 @@ export default function Home() {
             signals={customerSignals || 6}
           />
         </header>
+
+        <IntegrationHub
+          onSlackImport={importSlackMessages}
+          onZoomImport={importZoomTranscript}
+          onJiraImport={importJiraUpdates}
+        />
 
         {error && (
           <div className="mb-6 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-200">
@@ -459,7 +510,7 @@ export default function Home() {
           </p>
 
           <h2 className="text-3xl font-black">
-            Three noisy inputs. One clear operating view.
+            Three noisy inputs. One operating and revenue view.
           </h2>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -534,14 +585,14 @@ const teamStats = Object.values(
 
   return (
     <div className="space-y-5">
+      <RevenueImpactPanel impact={revenueImpact} />
+
       <div className="grid grid-cols-2 gap-4">
         <MetricCard label="Active Tasks" value={activeTasks} />
         <MetricCard label="Blocked Tasks" value={blockedTasks} />
         <MetricCard label="At Risk" value={atRiskTasks} />
-        <MetricCard label="Signals" value={customerSignals} />
+        <MetricCard label="Customer Signals" value={customerSignals} />
       </div>
-      
-      <RevenueImpactPanel impact={revenueImpact} />
       
       <div className="rounded-2xl border border-white/10 bg-[#070a19]/70 p-5">
         <p className="mb-2 text-xs uppercase tracking-[0.25em] text-cyan-300">
@@ -945,4 +996,103 @@ ${result.tasks
   )
   .join("\n")}
 `;
+}
+
+function IntegrationHub({
+  onSlackImport,
+  onZoomImport,
+  onJiraImport,
+}: {
+  onSlackImport: () => void;
+  onZoomImport: () => void;
+  onJiraImport: () => void;
+}) {
+  return (
+    <section className="mb-6 rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+      <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-[0.3em] text-violet-300">
+            Integration-ready MVP
+          </p>
+          <h2 className="text-3xl font-black">Connect workplace sources</h2>
+          <p className="mt-2 max-w-2xl text-sm text-slate-400">
+            For this hackathon demo, these cards simulate imports from common
+            workplace tools. In production, they can be replaced with real API
+            connectors.
+          </p>
+        </div>
+
+        <span className="w-fit rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs font-semibold text-cyan-200">
+          Mock import mode
+        </span>
+      </div>
+
+      <div className="grid items-stretch gap-4 md:grid-cols-3">
+        <IntegrationCard
+          label="Slack"
+          title="Import support signals"
+          description="Load customer issues, complaints, feature requests and sales opportunities from team channels."
+          buttonText="Import Slack messages"
+          onClick={onSlackImport}
+        />
+
+        <IntegrationCard
+          label="Zoom"
+          title="Import meeting transcript"
+          description="Load a meeting transcript and extract decisions, action items, owners and deadlines."
+          buttonText="Import Zoom transcript"
+          onClick={onZoomImport}
+        />
+
+        <IntegrationCard
+          label="Jira"
+          title="Import sprint update"
+          description="Load sprint status, blockers and team progress from project management updates."
+          buttonText="Import Jira update"
+          onClick={onJiraImport}
+        />
+      </div>
+    </section>
+  );
+}
+
+function IntegrationCard({
+  label,
+  title,
+  description,
+  buttonText,
+  onClick,
+}: {
+  label: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="group flex h-full min-h-[370px] flex-col rounded-2xl border border-white/10 bg-[#070a19]/70 p-5 transition hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-white/[0.06]">
+      <div className="mb-5 flex items-center justify-between">
+        <div className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-sm font-black text-white">
+          {label}
+        </div>
+
+        <div className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.9)]" />
+      </div>
+
+      <h3 className="text-xl font-bold">{title}</h3>
+
+      <p className="mt-3 text-sm leading-6 text-slate-400">
+        {description}
+      </p>
+
+      <div className="mt-auto pt-6">
+        <button
+          onClick={onClick}
+          className="w-full rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm font-bold text-cyan-200 transition hover:bg-cyan-300/20"
+        >
+          {buttonText}
+        </button>
+      </div>
+    </div>
+  );
 }
