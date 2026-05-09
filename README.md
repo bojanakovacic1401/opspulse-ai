@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OpsPulse AI
 
-## Getting Started
+**From workplace noise to actionable insight.**
 
-First, run the development server:
+OpsPulse AI is an AI-powered operational intelligence dashboard that turns meeting transcripts, support messages and team updates into clear tasks, blockers, risks and executive insights.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+It helps managers understand what the team is working on, what is blocked, what risks are emerging and what actions should be taken next.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Problem
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Modern teams generate important operational information across many unstructured channels:
 
-## Learn More
+- meeting transcripts
+- support tickets
+- customer feedback
+- daily updates
+- weekly reports
+- internal messages
 
-To learn more about Next.js, take a look at the following resources:
+Important decisions, blockers and risks often get lost in this noise.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Managers usually have to manually read through many messages and updates to understand:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- what the team is working on
+- which tasks are delayed
+- who owns each action item
+- which issues are affecting customers
+- which blockers need escalation
+- what the top risks are this week
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Solution
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+OpsPulse AI analyzes raw workplace inputs and converts them into a structured management dashboard.
+
+The app extracts:
+
+- executive summary
+- decisions
+- action items
+- task owners
+- deadlines
+- priorities
+- blockers
+- risks
+- feedback categories
+- recommended management actions
+- ready-to-share executive brief
+
+---
+
+## Demo Flow
+
+1. Click **Load demo data**
+2. Review the generated meeting transcript, support messages and team updates
+3. Click **Generate OpsPulse**
+4. View the management dashboard
+5. Review the executive brief
+6. Click **Copy report** to copy a ready-to-share management summary
+
+---
+
+## Core Features
+
+### Meeting Intelligence
+
+Extracts decisions, tasks, owners, deadlines and blockers from meeting transcripts.
+
+### Feedback Intelligence
+
+Classifies support and customer feedback into categories such as:
+
+- bug
+- feature request
+- complaint
+- sales opportunity
+- praise
+
+### Management Dashboard
+
+Shows:
+
+- active tasks
+- blocked tasks
+- at-risk work
+- customer signals
+- top risks
+- recommended actions
+- team load map
+- customer signal mix
+
+### Executive Brief
+
+Generates a ready-to-copy weekly management report from the analyzed inputs.
+
+---
+
+## Tech Stack
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- OpenAI API
+- GitHub
+
+---
+
+## AI Mode
+
+The application is designed to use the OpenAI API for live analysis.
+
+If the API quota is unavailable, the app automatically falls back to demo analysis mode. This keeps the hackathon demo stable and reliable while still showing the full product experience.
+
+To enable live AI analysis, create a `.env.local` file:
+
+```env
+OPENAI_API_KEY=your_openai_api_key_here

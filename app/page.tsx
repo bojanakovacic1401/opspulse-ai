@@ -36,6 +36,14 @@ type FeedbackCategory = {
   count: number;
 };
 
+type RevenueImpact = {
+  revenueAtRisk: string;
+  expansionPipeline: string;
+  churnRiskSignals: number;
+  salesOpportunities: number;
+  insights: string[];
+};
+
 type AnalysisResult = {
   summary: string;
   decisions: string[];
@@ -44,6 +52,19 @@ type AnalysisResult = {
   blockers: string[];
   feedbackCategories: FeedbackCategory[];
   recommendedActions: string[];
+  revenueImpact?: RevenueImpact;
+};
+
+const fallbackRevenueImpact: RevenueImpact = {
+  revenueAtRisk: "$18,000",
+  expansionPipeline: "$42,000",
+  churnRiskSignals: 2,
+  salesOpportunities: 2,
+  insights: [
+    "Enterprise customer may convert if SSO is prioritized this week.",
+    "Repeated login failures create churn risk for existing accounts.",
+    "Slow dashboard performance may block expansion in reporting-heavy teams.",
+  ],
 };
 
 const fallbackResult: AnalysisResult = {
@@ -108,6 +129,7 @@ const fallbackResult: AnalysisResult = {
     "Finalize onboarding copy before the design handoff.",
     "Create a sales follow-up task for the enterprise SSO opportunity.",
   ],
+    revenueImpact: fallbackRevenueImpact,
 };
 
 export default function Home() {
@@ -117,6 +139,7 @@ export default function Home() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   function loadDemoData() {
     setMeeting(demoMeeting);
@@ -124,12 +147,14 @@ export default function Home() {
     setUpdates(demoUpdates);
     setResult(null);
     setError("");
+    setCopied(false);
   }
 
   async function analyzeData() {
     setIsLoading(true);
     setError("");
     setResult(null);
+    setCopied(false);
 
     try {
       const response = await fetch("/api/analyze", {
@@ -162,14 +187,23 @@ export default function Home() {
     }
   }
 
+  async function copyExecutiveBrief() {
+    if (!result) return;
+
+    const brief = buildExecutiveBrief(result);
+    await navigator.clipboard.writeText(brief);
+
+    setCopied(true);
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  }
+
   const activeTasks = result?.tasks?.length ?? 0;
 
   const blockedTasks =
     result?.tasks?.filter((task) => task.status.toLowerCase() === "blocked")
-      .length ?? 0;
-
-  const atRiskTasks =
-    result?.tasks?.filter((task) => task.status.toLowerCase() === "at risk")
       .length ?? 0;
 
   const customerSignals =
@@ -201,7 +235,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hidden items-center gap-2 text-xs text-slate-400 md:flex">
+          <div className="hidden items-center gap-2 text-xs md:flex">
             <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-300">
               Demo Ready
             </span>
@@ -341,6 +375,14 @@ export default function Home() {
         </section>
 
         {result && (
+          <ExecutiveBrief
+            result={result}
+            copied={copied}
+            onCopy={copyExecutiveBrief}
+          />
+        )}
+
+        {result && (
           <section className="mt-6 grid gap-6 lg:grid-cols-3">
             <Panel title="Decisions">
               <List items={result.decisions} />
@@ -455,38 +497,40 @@ function Dashboard({ result }: { result: AnalysisResult }) {
   ).length;
 
   const customerSignals = result.feedbackCategories.reduce(
-    (sum, item) => sum + item.count,
-    0
+  (sum, item) => sum + item.count,
+  0
+);
+
+const revenueImpact = result.revenueImpact ?? fallbackRevenueImpact;
+
+const teamStats = Object.values(
+    result.tasks.reduce<
+      Record<string, { team: string; tasks: number; blockers: number }>
+    >((acc, task) => {
+      if (!acc[task.team]) {
+        acc[task.team] = {
+          team: task.team,
+          tasks: 0,
+          blockers: 0,
+        };
+      }
+
+      acc[task.team].tasks += 1;
+
+      if (task.status.toLowerCase() === "blocked") {
+        acc[task.team].blockers += 1;
+      }
+
+      return acc;
+    }, {})
   );
 
-  const teamStats = Object.values(
-  result.tasks.reduce<
-    Record<string, { team: string; tasks: number; blockers: number }>
-  >((acc, task) => {
-    if (!acc[task.team]) {
-      acc[task.team] = {
-        team: task.team,
-        tasks: 0,
-        blockers: 0,
-      };
-    }
+  const maxTeamTasks = Math.max(...teamStats.map((team) => team.tasks), 1);
 
-    acc[task.team].tasks += 1;
-
-    if (task.status.toLowerCase() === "blocked") {
-      acc[task.team].blockers += 1;
-    }
-
-    return acc;
-  }, {})
-);
-
-const maxTeamTasks = Math.max(...teamStats.map((team) => team.tasks), 1);
-
-const maxFeedbackCount = Math.max(
-  ...result.feedbackCategories.map((item) => item.count),
-  1
-);
+  const maxFeedbackCount = Math.max(
+    ...result.feedbackCategories.map((item) => item.count),
+    1
+  );
 
   return (
     <div className="space-y-5">
@@ -496,7 +540,9 @@ const maxFeedbackCount = Math.max(
         <MetricCard label="At Risk" value={atRiskTasks} />
         <MetricCard label="Signals" value={customerSignals} />
       </div>
-
+      
+      <RevenueImpactPanel impact={revenueImpact} />
+      
       <div className="rounded-2xl border border-white/10 bg-[#070a19]/70 p-5">
         <p className="mb-2 text-xs uppercase tracking-[0.25em] text-cyan-300">
           Executive Summary
@@ -505,62 +551,64 @@ const maxFeedbackCount = Math.max(
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-  <div className="rounded-2xl border border-white/10 bg-[#070a19]/70 p-5">
-    <p className="mb-4 text-xs uppercase tracking-[0.25em] text-violet-300">
-      Team Load Map
-    </p>
+        <div className="rounded-2xl border border-white/10 bg-[#070a19]/70 p-5">
+          <p className="mb-4 text-xs uppercase tracking-[0.25em] text-violet-300">
+            Team Load Map
+          </p>
 
-    <div className="space-y-4">
-      {teamStats.map((team) => (
-        <div key={team.team}>
-          <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="font-semibold text-slate-300">{team.team}</span>
-            <span className="text-slate-500">
-              {team.tasks} tasks · {team.blockers} blockers
-            </span>
-          </div>
+          <div className="space-y-4">
+            {teamStats.map((team) => (
+              <div key={team.team}>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="font-semibold text-slate-300">
+                    {team.team}
+                  </span>
+                  <span className="text-slate-500">
+                    {team.tasks} tasks · {team.blockers} blockers
+                  </span>
+                </div>
 
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-violet-300"
-              style={{
-                width: `${(team.tasks / maxTeamTasks) * 100}%`,
-              }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-
-  <div className="rounded-2xl border border-white/10 bg-[#070a19]/70 p-5">
-    <p className="mb-4 text-xs uppercase tracking-[0.25em] text-fuchsia-300">
-      Customer Signal Mix
-    </p>
-
-    <div className="space-y-4">
-      {result.feedbackCategories.map((item) => (
-        <div key={item.category}>
-          <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="font-semibold text-slate-300">
-              {item.category}
-            </span>
-            <span className="text-slate-500">{item.count}</span>
-          </div>
-
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-fuchsia-300 to-cyan-300"
-              style={{
-                width: `${(item.count / maxFeedbackCount) * 100}%`,
-              }}
-            />
+                <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-violet-300"
+                    style={{
+                      width: `${(team.tasks / maxTeamTasks) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      ))}
-    </div>
-  </div>
-</div>
+
+        <div className="rounded-2xl border border-white/10 bg-[#070a19]/70 p-5">
+          <p className="mb-4 text-xs uppercase tracking-[0.25em] text-fuchsia-300">
+            Customer Signal Mix
+          </p>
+
+          <div className="space-y-4">
+            {result.feedbackCategories.map((item) => (
+              <div key={item.category}>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="font-semibold text-slate-300">
+                    {item.category}
+                  </span>
+                  <span className="text-slate-500">{item.count}</span>
+                </div>
+
+                <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-fuchsia-300 to-cyan-300"
+                    style={{
+                      width: `${(item.count / maxFeedbackCount) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <div className="rounded-2xl border border-white/10 bg-[#070a19]/70 p-5">
         <p className="mb-3 text-xs uppercase tracking-[0.25em] text-fuchsia-300">
@@ -575,6 +623,65 @@ const maxFeedbackCount = Math.max(
         </p>
         <List items={result.recommendedActions} />
       </div>
+    </div>
+  );
+}
+
+function ExecutiveBrief({
+  result,
+  copied,
+  onCopy,
+}: {
+  result: AnalysisResult;
+  copied: boolean;
+  onCopy: () => void;
+}) {
+  return (
+    <section className="mt-6 rounded-[2rem] border border-white/10 bg-white/[0.05] p-6 shadow-2xl backdrop-blur-xl">
+      <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-[0.3em] text-emerald-300">
+            Auto-generated report
+          </p>
+          <h2 className="text-3xl font-black">
+            This Week&apos;s Executive Brief
+          </h2>
+          <p className="mt-2 text-sm text-slate-400">
+            A ready-to-share management summary generated from meetings,
+            feedback and team updates.
+          </p>
+        </div>
+
+        <button
+          onClick={onCopy}
+          className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-5 py-3 text-sm font-bold text-emerald-200 transition hover:bg-emerald-300/20"
+        >
+          {copied ? "Copied!" : "Copy report"}
+        </button>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
+        <p className="mb-4 text-lg font-bold text-white">Operating Summary</p>
+        <p className="leading-7 text-slate-300">{result.summary}</p>
+
+        <div className="mt-6 grid gap-5 md:grid-cols-3">
+          <BriefColumn title="Top Risks" items={result.risks.slice(0, 3)} />
+          <BriefColumn title="Blockers" items={result.blockers.slice(0, 3)} />
+          <BriefColumn
+            title="Next Actions"
+            items={result.recommendedActions.slice(0, 3)}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BriefColumn({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <h3 className="mb-3 font-bold text-cyan-300">{title}</h3>
+      <List items={items} />
     </div>
   );
 }
@@ -739,4 +846,103 @@ function HowItWorksCard({
       <p className="mt-3 text-sm leading-6 text-slate-400">{text}</p>
     </div>
   );
+}
+
+function RevenueImpactPanel({ impact }: { impact: RevenueImpact }) {
+  return (
+    <div className="rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-5 shadow-[0_0_40px_rgba(16,185,129,0.08)]">
+      <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-[0.25em] text-emerald-300">
+            Revenue Impact
+          </p>
+          <h3 className="text-2xl font-black text-white">
+            Revenue risks and opportunities hidden in daily work
+          </h3>
+        </div>
+
+        <span className="w-fit rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-xs font-bold text-emerald-200">
+          Revenue Intelligence
+        </span>
+      </div>
+
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <RevenueMetric label="Revenue at Risk" value={impact.revenueAtRisk} />
+        <RevenueMetric
+          label="Expansion Pipeline"
+          value={impact.expansionPipeline}
+        />
+        <RevenueMetric
+          label="Churn Risk Signals"
+          value={impact.churnRiskSignals.toString()}
+        />
+        <RevenueMetric
+          label="Sales Opportunities"
+          value={impact.salesOpportunities.toString()}
+        />
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-4">
+        <p className="mb-3 text-sm font-bold text-emerald-300">
+          Revenue Insights
+        </p>
+        <List items={impact.insights} />
+      </div>
+    </div>
+  );
+}
+
+function RevenueMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-4">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="mt-2 text-2xl font-black text-emerald-300">{value}</p>
+    </div>
+  );
+}
+
+function buildExecutiveBrief(result: AnalysisResult) {
+  const revenueImpact = result.revenueImpact ?? fallbackRevenueImpact;
+
+  return `OpsPulse AI — Executive Brief
+
+Summary:
+${result.summary}
+
+Revenue Impact:
+- Revenue at Risk: ${revenueImpact.revenueAtRisk}
+- Expansion Pipeline: ${revenueImpact.expansionPipeline}
+- Churn Risk Signals: ${revenueImpact.churnRiskSignals}
+- Sales Opportunities: ${revenueImpact.salesOpportunities}
+
+Revenue Insights:
+${revenueImpact.insights
+  .map((insight, index) => `${index + 1}. ${insight}`)
+  .join("\n")}
+
+Top Risks:
+${result.risks.map((risk, index) => `${index + 1}. ${risk}`).join("\n")}
+
+Blockers:
+${result.blockers
+  .map((blocker, index) => `${index + 1}. ${blocker}`)
+  .join("\n")}
+
+Recommended Actions:
+${result.recommendedActions
+  .map((action, index) => `${index + 1}. ${action}`)
+  .join("\n")}
+
+Action Items:
+${result.tasks
+  .map(
+    (task, index) =>
+      `${index + 1}. ${task.title} — Owner: ${task.owner}, Team: ${
+        task.team
+      }, Due: ${task.dueDate}, Priority: ${task.priority}, Status: ${
+        task.status
+      }`
+  )
+  .join("\n")}
+`;
 }

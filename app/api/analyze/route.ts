@@ -33,12 +33,12 @@ export async function POST(request: Request) {
     const teamUpdates = body.teamUpdates || "";
 
     const response = await client.responses.create({
-      model: "gpt-5",
+      model: "gpt-5-mini",
       input: [
         {
           role: "developer",
           content:
-            "You are OpsPulse AI. Return only valid JSON. No markdown. No explanation.",
+            "You are OpsPulse AI. Return only valid JSON. No markdown. No explanation. Keep everything in English.",
         },
         {
           role: "user",
@@ -77,7 +77,14 @@ Return this exact JSON structure:
       "count": 0
     }
   ],
-  "recommendedActions": ["string"]
+  "recommendedActions": ["string"],
+  "revenueImpact": {
+    "revenueAtRisk": "string",
+    "expansionPipeline": "string",
+    "churnRiskSignals": 0,
+    "salesOpportunities": 0,
+    "insights": ["string"]
+  }
 }
 
 Rules:
@@ -85,6 +92,14 @@ Rules:
 - If due date is unclear, use "Not specified".
 - If team is unclear, infer the most likely team.
 - Keep everything in English.
+- Extract concrete tasks from meetings and updates.
+- Classify feedback into the provided feedback categories.
+- Identify blockers that slow down delivery.
+- Identify risks that could affect customers, deadlines or revenue.
+- Estimate revenue impact from customer complaints, churn signals, urgent issues and sales opportunities.
+- If exact revenue is unknown, use reasonable demo estimates such as "$18,000" or "$42,000".
+- Revenue insights should connect customer issues and sales requests to business impact.
+- Recommended actions should be specific, practical and management-oriented.
 `,
         },
       ],
