@@ -917,21 +917,21 @@ function RevenueImpactPanel({ impact }: { impact: RevenueImpact }) {
         </span>
       </div>
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <RevenueMetric label="Revenue at Risk" value={impact.revenueAtRisk} />
-        <RevenueMetric
-          label="Expansion Pipeline"
-          value={impact.expansionPipeline}
-        />
-        <RevenueMetric
-          label="Churn Risk Signals"
-          value={impact.churnRiskSignals.toString()}
-        />
-        <RevenueMetric
-          label="Sales Opportunities"
-          value={impact.salesOpportunities.toString()}
-        />
-      </div>
+      <div className="mb-5 grid gap-3 sm:grid-cols-2">
+      <RevenueMetric label="Revenue at Risk" value={impact.revenueAtRisk} />
+      <RevenueMetric
+        label="Expansion Pipeline"
+        value={impact.expansionPipeline}
+      />
+      <RevenueMetric
+        label="Churn Risk Signals"
+        value={impact.churnRiskSignals.toString()}
+      />
+      <RevenueMetric
+        label="Sales Opportunities"
+        value={impact.salesOpportunities.toString()}
+      />
+    </div>
 
       <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-4">
         <p className="mb-3 text-sm font-bold text-emerald-300">
@@ -945,9 +945,11 @@ function RevenueImpactPanel({ impact }: { impact: RevenueImpact }) {
 
 function RevenueMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-4">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-black text-emerald-300">{value}</p>
+    <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
+      <p className="text-sm font-semibold text-slate-400">{label}</p>
+      <p className="mt-3 whitespace-nowrap text-3xl font-black tracking-tight text-emerald-300">
+        {value}
+      </p>
     </div>
   );
 }
