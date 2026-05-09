@@ -54,6 +54,7 @@ ${supportMessages}
 TEAM UPDATES:
 ${teamUpdates}
 
+
 Return this exact JSON structure:
 
 {
@@ -84,9 +85,15 @@ Return this exact JSON structure:
     "churnRiskSignals": 0,
     "salesOpportunities": 0,
     "insights": ["string"]
+  },
+  "businessImpact": {
+    "timeSavedPerManager": "string",
+    "annualHoursSaved": "string",
+    "estimatedAnnualSavings": "string",
+    "pipelineSurfaced": "string",
+    "assumptions": ["string"]
   }
 }
-
 Rules:
 - If owner is unclear, use "Unassigned".
 - If due date is unclear, use "Not specified".
@@ -100,6 +107,9 @@ Rules:
 - If exact revenue is unknown, use reasonable demo estimates such as "$18,000" or "$42,000".
 - Revenue insights should connect customer issues and sales requests to business impact.
 - Recommended actions should be specific, practical and management-oriented.
+- Estimate business impact using demo assumptions.
+- Include time saved, annual productivity savings and pipeline surfaced.
+- Clearly frame business impact as estimated or projected, not guaranteed.
 `,
         },
       ],

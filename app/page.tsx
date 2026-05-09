@@ -27,7 +27,8 @@ Customer A: I cannot log in after the latest update.
 Customer B: The dashboard is very slow when loading reports.
 Customer C: We need SSO before buying the enterprise plan.
 Customer D: Login keeps failing for multiple team members.
-Customer E: We are interested in a 50-seat enterprise plan if SSO is available.`;
+Customer E: We are interested in a 50-seat enterprise plan if SSO is available.
+Customer F: Procurement asked for annual pricing for two additional departments.`;
 
 const zoomDemo = `Zoom Meeting Transcript
 
@@ -68,6 +69,14 @@ type RevenueImpact = {
   insights: string[];
 };
 
+type BusinessImpact = {
+  timeSavedPerManager: string;
+  annualHoursSaved: string;
+  estimatedAnnualSavings: string;
+  pipelineSurfaced: string;
+  assumptions: string[];
+};
+
 type AnalysisResult = {
   summary: string;
   decisions: string[];
@@ -77,17 +86,30 @@ type AnalysisResult = {
   feedbackCategories: FeedbackCategory[];
   recommendedActions: string[];
   revenueImpact?: RevenueImpact;
+  businessImpact?: BusinessImpact;
 };
 
 const fallbackRevenueImpact: RevenueImpact = {
-  revenueAtRisk: "$18,000",
-  expansionPipeline: "$42,000",
+  revenueAtRisk: "€18,000",
+  expansionPipeline: "€50,000",
   churnRiskSignals: 2,
-  salesOpportunities: 2,
+  salesOpportunities: 3,
   insights: [
     "Enterprise customer may convert if SSO is prioritized this week.",
     "Repeated login failures create churn risk for existing accounts.",
-    "Slow dashboard performance may block expansion in reporting-heavy teams.",
+    "Procurement interest and annual pricing requests indicate expansion potential.",
+  ],
+};
+
+const fallbackBusinessImpact: BusinessImpact = {
+  timeSavedPerManager: "10h/week",
+  annualHoursSaved: "5,200h/year",
+  estimatedAnnualSavings: "€260,000/year",
+  pipelineSurfaced: "€50,000",
+  assumptions: [
+    "Assumes 10 managers save 10 hours per week by reducing manual reporting, follow-ups and status checking.",
+    "Uses an estimated fully loaded management cost of €50/hour.",
+    "Pipeline surfaced is based on demo sales signals found in support and customer messages.",
   ],
 };
 
@@ -154,6 +176,7 @@ const fallbackResult: AnalysisResult = {
     "Create a sales follow-up task for the enterprise SSO opportunity.",
   ],
     revenueImpact: fallbackRevenueImpact,
+    businessImpact: fallbackBusinessImpact,
 };
 
 export default function Home() {
@@ -164,6 +187,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [importMessage, setImportMessage] = useState("");
 
   function loadDemoData() {
     setMeeting(demoMeeting);
@@ -172,6 +196,7 @@ export default function Home() {
     setResult(null);
     setError("");
     setCopied(false);
+    setImportMessage("Demo data loaded successfully.");
   }
 
   function importSlackMessages() {
@@ -193,6 +218,66 @@ function importJiraUpdates() {
   setResult(null);
   setError("");
   setCopied(false);
+}
+
+function readFileAsText(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      resolve(String(reader.result || ""));
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Failed to read file."));
+    };
+
+    reader.readAsText(file);
+  });
+}
+
+async function handleFileUpload(
+  file: File,
+  target: "meeting" | "feedback" | "updates"
+) {
+  const allowedExtensions = [".txt", ".csv", ".md", ".json", ".vtt"];
+  const fileName = file.name.toLowerCase();
+
+  const isAllowed = allowedExtensions.some((extension) =>
+    fileName.endsWith(extension)
+  );
+
+  if (!isAllowed) {
+    setImportMessage(
+      "Unsupported file type. Please upload .txt, .csv, .md, .json or .vtt files."
+    );
+    return;
+  }
+
+  try {
+    const text = await readFileAsText(file);
+
+    if (target === "meeting") {
+      setMeeting(text);
+      setImportMessage(`${file.name} uploaded into Meeting transcript.`);
+    }
+
+    if (target === "feedback") {
+      setFeedback(text);
+      setImportMessage(`${file.name} uploaded into Support / feedback messages.`);
+    }
+
+    if (target === "updates") {
+      setUpdates(text);
+      setImportMessage(`${file.name} uploaded into Team updates.`);
+    }
+
+    setResult(null);
+    setError("");
+    setCopied(false);
+  } catch {
+    setImportMessage("Could not read this file. Please try another file.");
+  }
 }
 
   async function analyzeData() {
@@ -340,6 +425,12 @@ function importJiraUpdates() {
           onJiraImport={importJiraUpdates}
         />
 
+      {importMessage && (
+      <div className="mb-6 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm font-semibold text-cyan-200">
+        {importMessage}
+      </div>
+    )}
+
         {error && (
           <div className="mb-6 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-200">
             {error}
@@ -368,14 +459,16 @@ function importJiraUpdates() {
               label="Meeting transcript"
               value={meeting}
               onChange={setMeeting}
+              onFileUpload={(file) => handleFileUpload(file, "meeting")}
               placeholder="Paste meeting transcript here..."
               height="h-36"
             />
 
-            <InputBlock
+             <InputBlock
               label="Support / feedback messages"
               value={feedback}
               onChange={setFeedback}
+              onFileUpload={(file) => handleFileUpload(file, "feedback")}
               placeholder="Paste support messages here..."
               height="h-36"
             />
@@ -384,6 +477,7 @@ function importJiraUpdates() {
               label="Team updates"
               value={updates}
               onChange={setUpdates}
+              onFileUpload={(file) => handleFileUpload(file, "updates")}
               placeholder="Paste daily or weekly team updates here..."
               height="h-32"
             />
@@ -553,6 +647,7 @@ function Dashboard({ result }: { result: AnalysisResult }) {
 );
 
 const revenueImpact = result.revenueImpact ?? fallbackRevenueImpact;
+const businessImpact = result.businessImpact ?? fallbackBusinessImpact;
 
 const teamStats = Object.values(
     result.tasks.reduce<
@@ -586,6 +681,7 @@ const teamStats = Object.values(
   return (
     <div className="space-y-5">
       <RevenueImpactPanel impact={revenueImpact} />
+      <BusinessImpactPanel impact={businessImpact} />
 
       <div className="grid grid-cols-2 gap-4">
         <MetricCard label="Active Tasks" value={activeTasks} />
@@ -817,20 +913,44 @@ function InputBlock({
   label,
   value,
   onChange,
+  onFileUpload,
   placeholder,
   height,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  onFileUpload?: (file: File) => void;
   placeholder: string;
   height: string;
 }) {
   return (
     <div className="mb-4">
-      <label className="mb-2 block text-sm font-semibold text-slate-300">
-        {label}
-      </label>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <label className="block text-sm font-semibold text-slate-300">
+          {label}
+        </label>
+
+        {onFileUpload && (
+          <label className="cursor-pointer rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-bold text-cyan-200 transition hover:bg-cyan-300/20">
+            Upload file
+            <input
+              type="file"
+              accept=".txt,.csv,.md,.json,.vtt,text/plain,text/csv,application/json"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+
+                if (file) {
+                  onFileUpload(file);
+                }
+
+                event.target.value = "";
+              }}
+            />
+          </label>
+        )}
+      </div>
 
       <textarea
         value={value}
@@ -956,6 +1076,7 @@ function RevenueMetric({ label, value }: { label: string; value: string }) {
 
 function buildExecutiveBrief(result: AnalysisResult) {
   const revenueImpact = result.revenueImpact ?? fallbackRevenueImpact;
+  const businessImpact = result.businessImpact ?? fallbackBusinessImpact;
 
   return `OpsPulse AI — Executive Brief
 
@@ -971,6 +1092,17 @@ Revenue Impact:
 Revenue Insights:
 ${revenueImpact.insights
   .map((insight, index) => `${index + 1}. ${insight}`)
+  .join("\n")}
+
+Estimated Business Impact:
+- Time Saved: ${businessImpact.timeSavedPerManager} per manager
+- Annual Hours Saved: ${businessImpact.annualHoursSaved}
+- Estimated Annual Savings: ${businessImpact.estimatedAnnualSavings}
+- Pipeline Surfaced: ${businessImpact.pipelineSurfaced}
+
+Business Impact Assumptions:
+${businessImpact.assumptions
+  .map((assumption, index) => `${index + 1}. ${assumption}`)
   .join("\n")}
 
 Top Risks:
@@ -1095,6 +1227,64 @@ function IntegrationCard({
           {buttonText}
         </button>
       </div>
+    </div>
+  );
+}
+
+function BusinessImpactPanel({ impact }: { impact: BusinessImpact }) {
+  return (
+    <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] p-5 shadow-[0_0_40px_rgba(34,211,238,0.08)]">
+      <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-[0.25em] text-cyan-300">
+            Estimated Business Impact
+          </p>
+          <h3 className="text-2xl font-black text-white">
+            Projected savings and revenue enablement
+          </h3>
+        </div>
+
+        <span className="w-fit rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-bold text-cyan-200">
+          Demo assumptions
+        </span>
+      </div>
+
+      <div className="mb-5 grid gap-3 sm:grid-cols-2">
+        <BusinessMetric
+          label="Time Saved"
+          value={impact.timeSavedPerManager}
+        />
+        <BusinessMetric
+          label="Annual Hours Saved"
+          value={impact.annualHoursSaved}
+        />
+        <BusinessMetric
+          label="Estimated Savings"
+          value={impact.estimatedAnnualSavings}
+        />
+        <BusinessMetric
+          label="Pipeline Surfaced"
+          value={impact.pipelineSurfaced}
+        />
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-4">
+        <p className="mb-3 text-sm font-bold text-cyan-300">
+          Calculation Assumptions
+        </p>
+        <List items={impact.assumptions} />
+      </div>
+    </div>
+  );
+}
+
+function BusinessMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
+      <p className="text-sm font-semibold text-slate-400">{label}</p>
+      <p className="mt-3 whitespace-nowrap text-3xl font-black tracking-tight text-cyan-300">
+        {value}
+      </p>
     </div>
   );
 }
