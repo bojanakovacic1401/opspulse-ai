@@ -1,65 +1,84 @@
 # OpsPulse AI
 
-**From workplace noise to actionable insight.**
+**Operational & Revenue Intelligence Dashboard**
 
-OpsPulse AI is an AI-powered operational intelligence dashboard that turns meeting transcripts, support messages and team updates into clear tasks, blockers, risks and executive insights.
+**Tagline:** From workplace noise to actionable insight.
 
-It helps managers understand what the team is working on, what is blocked, what risks are emerging and what actions should be taken next.
+OpsPulse AI turns meeting transcripts, support messages and team updates into clear tasks, blockers, churn risks, sales opportunities, revenue insights and executive briefs.
+
+It helps teams understand what is happening across the company, what is blocked, what could hurt revenue and what management should do next.
 
 ---
 
 ## Problem
 
-Modern teams generate important operational information across many unstructured channels:
+Modern teams generate important business signals every day across meetings, support conversations, customer feedback and team updates.
 
-- meeting transcripts
-- support tickets
-- customer feedback
-- daily updates
-- weekly reports
-- internal messages
+But those signals are usually scattered across different tools and formats.
 
-Important decisions, blockers and risks often get lost in this noise.
+As a result, managers often miss:
 
-Managers usually have to manually read through many messages and updates to understand:
+- important decisions
+- action items
+- task owners
+- blockers
+- customer complaints
+- churn risks
+- sales opportunities
+- revenue-impacting issues
 
-- what the team is working on
-- which tasks are delayed
-- who owns each action item
-- which issues are affecting customers
-- which blockers need escalation
-- what the top risks are this week
+This creates operational noise and slows down decision-making.
 
 ---
 
 ## Solution
 
-OpsPulse AI analyzes raw workplace inputs and converts them into a structured management dashboard.
+OpsPulse AI analyzes unstructured workplace inputs and converts them into a structured management dashboard.
 
 The app extracts:
 
 - executive summary
 - decisions
 - action items
-- task owners
+- owners
 - deadlines
-- priorities
 - blockers
 - risks
-- feedback categories
+- customer feedback categories
+- revenue at risk
+- expansion opportunities
+- churn risk signals
 - recommended management actions
-- ready-to-share executive brief
+- ready-to-copy executive brief
+
+---
+
+## Why It Matters
+
+OpsPulse AI is not only a productivity tool.
+
+It helps teams improve operational efficiency and protect revenue by surfacing business-critical signals hidden inside daily work.
+
+The dashboard helps management answer:
+
+- What is the team working on?
+- What is blocked?
+- What risks are emerging?
+- Which customer issues are repeating?
+- Which issues could create churn?
+- Which messages contain sales opportunities?
+- What should leadership do next?
 
 ---
 
 ## Demo Flow
 
-1. Click **Load demo data**
-2. Review the generated meeting transcript, support messages and team updates
-3. Click **Generate OpsPulse**
-4. View the management dashboard
-5. Review the executive brief
-6. Click **Copy report** to copy a ready-to-share management summary
+1. Click **Load demo data** or use the integration-ready import cards.
+2. Review the imported meeting transcript, support messages and team updates.
+3. Click **Generate OpsPulse**.
+4. View the management dashboard.
+5. Review revenue impact, team load, risks and recommended actions.
+6. Copy the auto-generated executive brief.
 
 ---
 
@@ -67,34 +86,54 @@ The app extracts:
 
 ### Meeting Intelligence
 
-Extracts decisions, tasks, owners, deadlines and blockers from meeting transcripts.
+Extracts decisions, action items, owners, deadlines, blockers and risks from meeting transcripts.
 
 ### Feedback Intelligence
 
-Classifies support and customer feedback into categories such as:
+Classifies customer and support messages into categories such as:
 
 - bug
 - feature request
 - complaint
+- urgent issue
 - sales opportunity
 - praise
 
-### Management Dashboard
+### Operational Dashboard
 
 Shows:
 
 - active tasks
 - blocked tasks
 - at-risk work
-- customer signals
-- top risks
-- recommended actions
 - team load map
 - customer signal mix
+- top risks
+- recommended actions
+
+### Revenue Intelligence
+
+Surfaces business impact from daily communication, including:
+
+- revenue at risk
+- expansion pipeline
+- churn risk signals
+- sales opportunities
+- revenue-related insights
 
 ### Executive Brief
 
-Generates a ready-to-copy weekly management report from the analyzed inputs.
+Generates a ready-to-copy management report that can be shared with leadership or the team.
+
+### Integration-Ready Import Hub
+
+The MVP includes simulated imports for:
+
+- Slack support messages
+- Zoom meeting transcripts
+- Jira sprint updates
+
+For the hackathon demo, these imports use mock data. In production, they can be replaced with real API connectors.
 
 ---
 
@@ -111,11 +150,96 @@ Generates a ready-to-copy weekly management report from the analyzed inputs.
 
 ## AI Mode
 
-The application is designed to use the OpenAI API for live analysis.
+OpsPulse AI is designed to use the OpenAI API for live analysis.
 
-If the API quota is unavailable, the app automatically falls back to demo analysis mode. This keeps the hackathon demo stable and reliable while still showing the full product experience.
+If API credits are unavailable, the app automatically uses demo mode with pre-generated analysis. This keeps the hackathon demo stable and reliable.
 
 To enable live AI analysis, create a `.env.local` file:
 
 ```env
 OPENAI_API_KEY=your_openai_api_key_here
+```
+
+An example environment file is provided in `.env.example`.
+
+---
+
+## Run Locally
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open the app:
+
+```text
+http://localhost:3000
+```
+
+---
+
+## Project Structure
+
+```text
+opspulse-ai
+├── app
+│   ├── page.tsx
+│   └── api
+│       └── analyze
+│           └── route.ts
+├── public
+├── .env.example
+├── package.json
+└── README.md
+```
+
+If the project uses a `src` directory, the main files are located in:
+
+```text
+src/app/page.tsx
+src/app/api/analyze/route.ts
+```
+
+---
+
+## Hackathon Positioning
+
+OpsPulse AI is an operational and revenue intelligence MVP.
+
+It does not track employees. It analyzes existing business inputs and turns them into structured insight.
+
+The goal is to help teams reduce operational chaos, detect blockers earlier, surface customer issues and identify revenue opportunities before they are missed.
+
+---
+
+## One-Sentence Pitch
+
+OpsPulse AI turns meetings, support messages and team updates into tasks, blockers, churn risks, sales opportunities and executive insights.
+
+---
+
+## Future Improvements
+
+- Real Slack integration
+- Real Zoom transcript import
+- Real Jira connector
+- Authentication
+- Team workspace support
+- Historical trend tracking
+- Export to PDF
+- Push tasks to Jira or Linear
+- Revenue impact scoring based on CRM data
+
+---
+
+## Summary
+
+OpsPulse AI transforms workplace noise into an actionable operating and revenue dashboard for modern teams.
