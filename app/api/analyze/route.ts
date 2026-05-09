@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const teamUpdates = body.teamUpdates || "";
 
     const response = await client.responses.create({
-      model: "gpt-5-mini",
+      model: "gpt-5.4-mini",
       input: [
         {
           role: "developer",
