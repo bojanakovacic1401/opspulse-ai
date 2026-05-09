@@ -1,20 +1,49 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
-const client = new OpenAI();
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+function parseJsonFromAi(text: string) {
+  const cleaned = text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+
+  if (!jsonMatch) {
+    throw new Error("AI did not return JSON. Raw output: " + cleaned);
+  }
+
+  return JSON.parse(jsonMatch[0]);
+}
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is missing. Check your .env.local file.");
+    }
+
     const body = await request.json();
 
     const meetingTranscript = body.meetingTranscript || "";
     const supportMessages = body.supportMessages || "";
     const teamUpdates = body.teamUpdates || "";
 
-    const prompt = `
-You are OpsPulse AI, an operational intelligence assistant.
-
-Analyze these company inputs:
+    const response = await client.responses.create({
+      model: "gpt-5",
+      input: [
+        {
+          role: "developer",
+          content:
+            "You are OpsPulse AI. Return only valid JSON. No markdown. No explanation.",
+        },
+        {
+          role: "user",
+          content: `
+Analyze these company inputs.
 
 MEETING TRANSCRIPT:
 ${meetingTranscript}
@@ -25,11 +54,7 @@ ${supportMessages}
 TEAM UPDATES:
 ${teamUpdates}
 
-Extract operational insights for management.
-
-Return ONLY valid JSON. Do not include markdown. Do not include explanations.
-
-Use exactly this JSON structure:
+Return this exact JSON structure:
 
 {
   "summary": "string",
@@ -59,26 +84,28 @@ Rules:
 - If owner is unclear, use "Unassigned".
 - If due date is unclear, use "Not specified".
 - If team is unclear, infer the most likely team.
-- Prioritize business impact.
-- Keep the summary concise.
-`;
-
-    const response = await client.responses.create({
-      model: "gpt-5.5",
-      input: prompt,
+- Keep everything in English.
+`,
+        },
+      ],
     });
 
     const text = response.output_text;
 
-    const data = JSON.parse(text);
+    console.log("AI RAW OUTPUT:", text);
+
+    const data = parseJsonFromAi(text);
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Analyze API error:", error);
+    console.error("ANALYZE API REAL ERROR:", error);
+
+    const message =
+      error instanceof Error ? error.message : "Unknown server error";
 
     return NextResponse.json(
       {
-        error: "Failed to analyze company inputs.",
+        error: message,
       },
       { status: 500 }
     );
