@@ -1079,9 +1079,9 @@ function RevenueImpactPanel({ impact }: { impact: RevenueImpact }) {
 
 function RevenueMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
+    <div className="min-w-0 rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
       <p className="text-sm font-semibold text-slate-400">{label}</p>
-      <p className="mt-3 whitespace-nowrap text-3xl font-black tracking-tight text-emerald-300">
+      <p className="mt-3 break-words text-2xl font-black tracking-tight text-emerald-300">
         {value}
       </p>
     </div>
@@ -1294,9 +1294,9 @@ function BusinessImpactPanel({ impact }: { impact: BusinessImpact }) {
 
 function BusinessMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
+    <div className="min-w-0 rounded-2xl border border-white/10 bg-[#070a19]/80 p-5">
       <p className="text-sm font-semibold text-slate-400">{label}</p>
-      <p className="mt-3 whitespace-nowrap text-3xl font-black tracking-tight text-cyan-300">
+      <p className="mt-3 break-words text-2xl font-black tracking-tight text-cyan-300">
         {value}
       </p>
     </div>
@@ -1474,9 +1474,9 @@ function CalculatorInput({
 
 function ValueCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+    <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
       <p className="text-sm text-slate-500">{label}</p>
-      <p className="mt-2 whitespace-nowrap text-2xl font-black text-cyan-300">
+      <p className="mt-2 break-words text-2xl font-black text-cyan-300">
         {value}
       </p>
     </div>

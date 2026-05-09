@@ -110,6 +110,10 @@ Rules:
 - Estimate business impact using demo assumptions.
 - Include time saved, annual productivity savings and pipeline surfaced.
 - Clearly frame business impact as estimated or projected, not guaranteed.
+- Keep revenueImpact.revenueAtRisk and revenueImpact.expansionPipeline as short currency values only, for example "$18,000" or "$42,000".
+- Keep businessImpact metric values short, for example "10h/week", "5,200h/year", "$260,000/year", "$50,000".
+- Put explanations only inside insights or assumptions, never inside metric values.
+- Use EUR currency symbol (€) for all revenue and business impact estimates.
 `,
         },
       ],
