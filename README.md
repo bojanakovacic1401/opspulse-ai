@@ -2,9 +2,11 @@
 
 **Operational & Revenue Intelligence Dashboard**
 
+**Live Demo:** https://opspulse-ai-green.vercel.app
+
 **Tagline:** From workplace noise to actionable insight.
 
-OpsPulse AI turns meeting transcripts, support messages and team updates into clear tasks, blockers, churn risks, sales opportunities, revenue insights and executive briefs.
+OpsPulse AI turns meeting transcripts, support messages and team updates into clear tasks, blockers, churn risks, sales opportunities, revenue insights, estimated business impact and executive briefs.
 
 It helps teams understand what is happening across the company, what is blocked, what could hurt revenue and what management should do next.
 
@@ -26,14 +28,15 @@ As a result, managers often miss:
 - churn risks
 - sales opportunities
 - revenue-impacting issues
+- repeated operational problems
 
-This creates operational noise and slows down decision-making.
+This creates operational noise, slows down decision-making and can cause teams to miss both risks and revenue opportunities.
 
 ---
 
 ## Solution
 
-OpsPulse AI analyzes unstructured workplace inputs and converts them into a structured management dashboard.
+OpsPulse AI analyzes unstructured workplace inputs and converts them into a structured operational and revenue intelligence dashboard.
 
 The app extracts:
 
@@ -48,6 +51,7 @@ The app extracts:
 - revenue at risk
 - expansion opportunities
 - churn risk signals
+- estimated business impact
 - recommended management actions
 - ready-to-copy executive brief
 
@@ -67,18 +71,21 @@ The dashboard helps management answer:
 - Which customer issues are repeating?
 - Which issues could create churn?
 - Which messages contain sales opportunities?
+- What is the estimated business impact?
 - What should leadership do next?
 
 ---
 
 ## Demo Flow
 
-1. Click **Load demo data** or use the integration-ready import cards.
-2. Review the imported meeting transcript, support messages and team updates.
-3. Click **Generate OpsPulse**.
-4. View the management dashboard.
-5. Review revenue impact, team load, risks and recommended actions.
-6. Copy the auto-generated executive brief.
+1. Open the live demo.
+2. Click **Load demo data**, use the integration-ready import cards or upload a text-based file.
+3. Review the meeting transcript, support messages and team updates.
+4. Click **Generate OpsPulse**.
+5. View the management dashboard.
+6. Review revenue impact and estimated business impact.
+7. Review team load, risks and recommended actions.
+8. Copy the auto-generated executive brief.
 
 ---
 
@@ -121,9 +128,49 @@ Surfaces business impact from daily communication, including:
 - sales opportunities
 - revenue-related insights
 
+### Estimated Business Impact
+
+Projects business value using demo assumptions, including:
+
+- time saved per manager
+- annual hours saved
+- estimated annual productivity savings
+- pipeline surfaced from customer messages
+
+Example demo assumptions:
+
+- 10 managers save 10 hours per week
+- estimated fully loaded management cost of €50/hour
+- projected annual productivity savings of €260,000
+- estimated pipeline surfaced of €50,000
+
+These numbers are framed as estimated demo projections, not guaranteed results.
+
 ### Executive Brief
 
 Generates a ready-to-copy management report that can be shared with leadership or the team.
+
+The brief includes:
+
+- summary
+- revenue impact
+- business impact
+- top risks
+- blockers
+- recommended actions
+- action items
+
+### File Upload
+
+OpsPulse AI supports uploading text-based workplace files, including:
+
+- `.txt`
+- `.csv`
+- `.md`
+- `.json`
+- `.vtt`
+
+This allows teams to upload exported meeting transcripts, support tickets or weekly updates without manually pasting everything.
 
 ### Integration-Ready Import Hub
 
@@ -137,6 +184,22 @@ For the hackathon demo, these imports use mock data. In production, they can be 
 
 ---
 
+## Implementation Approach
+
+For the hackathon MVP, OpsPulse AI supports:
+
+- manual paste input
+- text-based file upload
+- simulated Slack, Zoom and Jira imports
+- AI-ready backend analysis route
+- fallback demo mode for reliable presentation
+
+In a production environment, companies would not need to manually copy conversations. OpsPulse AI would connect to approved workplace systems such as Slack, Zoom, Jira, Zendesk, Intercom or HubSpot.
+
+Companies would choose which channels, projects or ticket queues to analyze. OpsPulse AI would then automatically process approved inputs, extract operational and revenue signals, and update the dashboard on a daily or weekly basis.
+
+---
+
 ## Tech Stack
 
 - Next.js
@@ -145,6 +208,7 @@ For the hackathon demo, these imports use mock data. In production, they can be 
 - Tailwind CSS
 - OpenAI API
 - GitHub
+- Vercel
 
 ---
 
@@ -216,13 +280,13 @@ OpsPulse AI is an operational and revenue intelligence MVP.
 
 It does not track employees. It analyzes existing business inputs and turns them into structured insight.
 
-The goal is to help teams reduce operational chaos, detect blockers earlier, surface customer issues and identify revenue opportunities before they are missed.
+The goal is to help teams reduce operational chaos, detect blockers earlier, surface customer issues, identify churn risks and uncover revenue opportunities before they are missed.
 
 ---
 
 ## One-Sentence Pitch
 
-OpsPulse AI turns meetings, support messages and team updates into tasks, blockers, churn risks, sales opportunities and executive insights.
+OpsPulse AI turns meetings, support messages and team updates into tasks, blockers, churn risks, sales opportunities, estimated business impact and executive insights.
 
 ---
 
@@ -231,12 +295,15 @@ OpsPulse AI turns meetings, support messages and team updates into tasks, blocke
 - Real Slack integration
 - Real Zoom transcript import
 - Real Jira connector
+- Zendesk and Intercom support
+- HubSpot or Salesforce CRM integration
 - Authentication
 - Team workspace support
 - Historical trend tracking
-- Export to PDF
-- Push tasks to Jira or Linear
-- Revenue impact scoring based on CRM data
+- PDF export
+- Push tasks to Jira, Linear or Asana
+- Revenue impact scoring based on real customer value
+- Automated weekly executive reports
 
 ---
 
