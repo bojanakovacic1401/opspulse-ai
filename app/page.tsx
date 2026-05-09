@@ -14,7 +14,8 @@ const demoFeedback = `1. I cannot log in after the latest update.
 3. The dashboard is very slow when loading reports.
 4. I love the new reporting feature.
 5. Login keeps failing for multiple team members.
-6. We are interested in a 50-seat enterprise plan if SSO is available.`;
+6. We are interested in a 50-seat enterprise plan if SSO is available.
+7. Procurement asked for annual pricing for two additional departments.`;
 
 const demoUpdates = `Engineering: Working on onboarding frontend. Blocked by final design.
 Product: Final onboarding copy is still not ready.
@@ -175,8 +176,8 @@ const fallbackResult: AnalysisResult = {
     "Finalize onboarding copy before the design handoff.",
     "Create a sales follow-up task for the enterprise SSO opportunity.",
   ],
-    revenueImpact: fallbackRevenueImpact,
-    businessImpact: fallbackBusinessImpact,
+  revenueImpact: fallbackRevenueImpact,
+  businessImpact: fallbackBusinessImpact,
 };
 
 export default function Home() {
@@ -189,12 +190,12 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [importMessage, setImportMessage] = useState("");
   const [impactScenario, setImpactScenario] = useState({
-  managers: 10,
-  hoursSavedPerWeek: 10,
-  hourlyCost: 50,
-  pipelineSurfaced: 50000,
-  revenueAtRisk: 18000,
-});
+    managers: 10,
+    hoursSavedPerWeek: 10,
+    hourlyCost: 50,
+    pipelineSurfaced: 50000,
+    revenueAtRisk: 18000,
+  });
 
   function loadDemoData() {
     setMeeting(demoMeeting);
@@ -207,85 +208,102 @@ export default function Home() {
   }
 
   function importSlackMessages() {
-  setFeedback(slackDemo);
-  setResult(null);
-  setError("");
-  setCopied(false);
-}
-
-function importZoomTranscript() {
-  setMeeting(zoomDemo);
-  setResult(null);
-  setError("");
-  setCopied(false);
-}
-
-function importJiraUpdates() {
-  setUpdates(jiraDemo);
-  setResult(null);
-  setError("");
-  setCopied(false);
-}
-
-function readFileAsText(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      resolve(String(reader.result || ""));
-    };
-
-    reader.onerror = () => {
-      reject(new Error("Failed to read file."));
-    };
-
-    reader.readAsText(file);
-  });
-}
-
-async function handleFileUpload(
-  file: File,
-  target: "meeting" | "feedback" | "updates"
-) {
-  const allowedExtensions = [".txt", ".csv", ".md", ".json", ".vtt"];
-  const fileName = file.name.toLowerCase();
-
-  const isAllowed = allowedExtensions.some((extension) =>
-    fileName.endsWith(extension)
-  );
-
-  if (!isAllowed) {
-    setImportMessage(
-      "Unsupported file type. Please upload .txt, .csv, .md, .json or .vtt files."
-    );
-    return;
-  }
-
-  try {
-    const text = await readFileAsText(file);
-
-    if (target === "meeting") {
-      setMeeting(text);
-      setImportMessage(`${file.name} uploaded into Meeting transcript.`);
-    }
-
-    if (target === "feedback") {
-      setFeedback(text);
-      setImportMessage(`${file.name} uploaded into Support / feedback messages.`);
-    }
-
-    if (target === "updates") {
-      setUpdates(text);
-      setImportMessage(`${file.name} uploaded into Team updates.`);
-    }
-
+    setFeedback(slackDemo);
     setResult(null);
     setError("");
     setCopied(false);
-  } catch {
-    setImportMessage("Could not read this file. Please try another file.");
+    setImportMessage(
+      "Slack support messages imported into Support / feedback messages."
+    );
   }
-}
+
+  function importZoomTranscript() {
+    setMeeting(zoomDemo);
+    setResult(null);
+    setError("");
+    setCopied(false);
+    setImportMessage("Zoom transcript imported into Meeting transcript.");
+  }
+
+  function importJiraUpdates() {
+    setUpdates(jiraDemo);
+    setResult(null);
+    setError("");
+    setCopied(false);
+    setImportMessage("Jira sprint update imported into Team updates.");
+  }
+
+  function importAllSources() {
+    setMeeting(zoomDemo);
+    setFeedback(slackDemo);
+    setUpdates(jiraDemo);
+    setResult(null);
+    setError("");
+    setCopied(false);
+    setImportMessage("Slack, Zoom and Jira demo sources imported successfully.");
+  }
+
+  function readFileAsText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        resolve(String(reader.result || ""));
+      };
+
+      reader.onerror = () => {
+        reject(new Error("Failed to read file."));
+      };
+
+      reader.readAsText(file);
+    });
+  }
+
+  async function handleFileUpload(
+    file: File,
+    target: "meeting" | "feedback" | "updates"
+  ) {
+    const allowedExtensions = [".txt", ".csv", ".md", ".json", ".vtt"];
+    const fileName = file.name.toLowerCase();
+
+    const isAllowed = allowedExtensions.some((extension) =>
+      fileName.endsWith(extension)
+    );
+
+    if (!isAllowed) {
+      setImportMessage(
+        "Unsupported file type. Please upload .txt, .csv, .md, .json or .vtt files."
+      );
+      return;
+    }
+
+    try {
+      const text = await readFileAsText(file);
+
+      if (target === "meeting") {
+        setMeeting(text);
+        setImportMessage(`${file.name} uploaded into Meeting transcript.`);
+      }
+
+      if (target === "feedback") {
+        setFeedback(text);
+        setImportMessage(
+          `${file.name} uploaded into Support / feedback messages.`
+        );
+      }
+
+      if (target === "updates") {
+        setUpdates(text);
+        setImportMessage(`${file.name} uploaded into Team updates.`);
+      }
+
+      setResult(null);
+      setError("");
+      setCopied(false);
+    } catch {
+      setImportMessage("Could not read this file. Please try another file.");
+    }
+  }
 
   async function analyzeData() {
     setIsLoading(true);
@@ -396,8 +414,9 @@ async function handleFileUpload(
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-              OpsPulse AI turns meetings, support messages and team updates into tasks,
-              blockers, churn risks, sales opportunities and executive briefs.
+              OpsPulse AI turns meetings, support messages and team updates into
+              tasks, blockers, churn risks, sales opportunities and executive
+              briefs.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -430,13 +449,14 @@ async function handleFileUpload(
           onSlackImport={importSlackMessages}
           onZoomImport={importZoomTranscript}
           onJiraImport={importJiraUpdates}
+          onImportAll={importAllSources}
         />
 
-      {importMessage && (
-      <div className="mb-6 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm font-semibold text-cyan-200">
-        {importMessage}
-      </div>
-    )}
+        {importMessage && (
+          <div className="mb-6 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm font-semibold text-cyan-200">
+            {importMessage}
+          </div>
+        )}
 
         {error && (
           <div className="mb-6 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-200">
@@ -444,13 +464,14 @@ async function handleFileUpload(
           </div>
         )}
 
-        <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="sticky top-6 self-start rounded-[2rem] border border-white/10 bg-white/[0.05] p-5 shadow-2xl backdrop-blur-xl">
-            <div className="mb-5 flex items-center justify-between">
+        <section className="space-y-6">
+          <div className="rounded-[2rem] border border-white/10 bg-white/[0.05] p-5 shadow-2xl backdrop-blur-xl">
+            <div className="mb-5 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold">Input Hub</h2>
                 <p className="mt-1 text-sm text-slate-400">
-                  Paste raw operational noise here.
+                  Paste raw operational noise here or upload exported workplace
+                  files.
                 </p>
               </div>
 
@@ -462,32 +483,34 @@ async function handleFileUpload(
               </button>
             </div>
 
-            <InputBlock
-              label="Meeting transcript"
-              value={meeting}
-              onChange={setMeeting}
-              onFileUpload={(file) => handleFileUpload(file, "meeting")}
-              placeholder="Paste meeting transcript here..."
-              height="h-36"
-            />
+            <div className="grid gap-4 lg:grid-cols-3">
+              <InputBlock
+                label="Meeting transcript"
+                value={meeting}
+                onChange={setMeeting}
+                onFileUpload={(file) => handleFileUpload(file, "meeting")}
+                placeholder="Paste meeting transcript here..."
+                height="h-52"
+              />
 
-             <InputBlock
-              label="Support / feedback messages"
-              value={feedback}
-              onChange={setFeedback}
-              onFileUpload={(file) => handleFileUpload(file, "feedback")}
-              placeholder="Paste support messages here..."
-              height="h-36"
-            />
+              <InputBlock
+                label="Support / feedback messages"
+                value={feedback}
+                onChange={setFeedback}
+                onFileUpload={(file) => handleFileUpload(file, "feedback")}
+                placeholder="Paste support messages here..."
+                height="h-52"
+              />
 
-            <InputBlock
-              label="Team updates"
-              value={updates}
-              onChange={setUpdates}
-              onFileUpload={(file) => handleFileUpload(file, "updates")}
-              placeholder="Paste daily or weekly team updates here..."
-              height="h-32"
-            />
+              <InputBlock
+                label="Team updates"
+                value={updates}
+                onChange={setUpdates}
+                onFileUpload={(file) => handleFileUpload(file, "updates")}
+                placeholder="Paste daily or weekly team updates here..."
+                height="h-52"
+              />
+            </div>
 
             <button
               onClick={analyzeData}
@@ -656,14 +679,14 @@ function Dashboard({ result }: { result: AnalysisResult }) {
   ).length;
 
   const customerSignals = result.feedbackCategories.reduce(
-  (sum, item) => sum + item.count,
-  0
-);
+    (sum, item) => sum + item.count,
+    0
+  );
 
-const revenueImpact = result.revenueImpact ?? fallbackRevenueImpact;
-const businessImpact = result.businessImpact ?? fallbackBusinessImpact;
+  const revenueImpact = result.revenueImpact ?? fallbackRevenueImpact;
+  const businessImpact = result.businessImpact ?? fallbackBusinessImpact;
 
-const teamStats = Object.values(
+  const teamStats = Object.values(
     result.tasks.reduce<
       Record<string, { team: string; tasks: number; blockers: number }>
     >((acc, task) => {
@@ -697,13 +720,13 @@ const teamStats = Object.values(
       <RevenueImpactPanel impact={revenueImpact} />
       <BusinessImpactPanel impact={businessImpact} />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <MetricCard label="Active Tasks" value={activeTasks} />
         <MetricCard label="Blocked Tasks" value={blockedTasks} />
         <MetricCard label="At Risk" value={atRiskTasks} />
         <MetricCard label="Customer Signals" value={customerSignals} />
       </div>
-      
+
       <div className="rounded-2xl border border-white/10 bg-[#070a19]/70 p-5">
         <p className="mb-2 text-xs uppercase tracking-[0.25em] text-cyan-300">
           Executive Summary
@@ -939,7 +962,7 @@ function InputBlock({
   height: string;
 }) {
   return (
-    <div className="mb-4">
+    <div className="mb-0">
       <div className="mb-2 flex items-center justify-between gap-3">
         <label className="block text-sm font-semibold text-slate-300">
           {label}
@@ -1051,21 +1074,21 @@ function RevenueImpactPanel({ impact }: { impact: RevenueImpact }) {
         </span>
       </div>
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2">
-      <RevenueMetric label="Revenue at Risk" value={impact.revenueAtRisk} />
-      <RevenueMetric
-        label="Expansion Pipeline"
-        value={impact.expansionPipeline}
-      />
-      <RevenueMetric
-        label="Churn Risk Signals"
-        value={impact.churnRiskSignals.toString()}
-      />
-      <RevenueMetric
-        label="Sales Opportunities"
-        value={impact.salesOpportunities.toString()}
-      />
-    </div>
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <RevenueMetric label="Revenue at Risk" value={impact.revenueAtRisk} />
+        <RevenueMetric
+          label="Expansion Pipeline"
+          value={impact.expansionPipeline}
+        />
+        <RevenueMetric
+          label="Churn Risk Signals"
+          value={impact.churnRiskSignals.toString()}
+        />
+        <RevenueMetric
+          label="Sales Opportunities"
+          value={impact.salesOpportunities.toString()}
+        />
+      </div>
 
       <div className="rounded-2xl border border-white/10 bg-[#070a19]/80 p-4">
         <p className="mb-3 text-sm font-bold text-emerald-300">
@@ -1088,163 +1111,6 @@ function RevenueMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function buildExecutiveBrief(result: AnalysisResult) {
-  const revenueImpact = result.revenueImpact ?? fallbackRevenueImpact;
-  const businessImpact = result.businessImpact ?? fallbackBusinessImpact;
-
-  return `OpsPulse AI — Executive Brief
-
-Summary:
-${result.summary}
-
-Revenue Impact:
-- Revenue at Risk: ${revenueImpact.revenueAtRisk}
-- Expansion Pipeline: ${revenueImpact.expansionPipeline}
-- Churn Risk Signals: ${revenueImpact.churnRiskSignals}
-- Sales Opportunities: ${revenueImpact.salesOpportunities}
-
-Revenue Insights:
-${revenueImpact.insights
-  .map((insight, index) => `${index + 1}. ${insight}`)
-  .join("\n")}
-
-Estimated Business Impact:
-- Time Saved: ${businessImpact.timeSavedPerManager} per manager
-- Annual Hours Saved: ${businessImpact.annualHoursSaved}
-- Estimated Annual Savings: ${businessImpact.estimatedAnnualSavings}
-- Pipeline Surfaced: ${businessImpact.pipelineSurfaced}
-
-Business Impact Assumptions:
-${businessImpact.assumptions
-  .map((assumption, index) => `${index + 1}. ${assumption}`)
-  .join("\n")}
-
-Top Risks:
-${result.risks.map((risk, index) => `${index + 1}. ${risk}`).join("\n")}
-
-Blockers:
-${result.blockers
-  .map((blocker, index) => `${index + 1}. ${blocker}`)
-  .join("\n")}
-
-Recommended Actions:
-${result.recommendedActions
-  .map((action, index) => `${index + 1}. ${action}`)
-  .join("\n")}
-
-Action Items:
-${result.tasks
-  .map(
-    (task, index) =>
-      `${index + 1}. ${task.title} — Owner: ${task.owner}, Team: ${
-        task.team
-      }, Due: ${task.dueDate}, Priority: ${task.priority}, Status: ${
-        task.status
-      }`
-  )
-  .join("\n")}
-`;
-}
-
-function IntegrationHub({
-  onSlackImport,
-  onZoomImport,
-  onJiraImport,
-}: {
-  onSlackImport: () => void;
-  onZoomImport: () => void;
-  onJiraImport: () => void;
-}) {
-  return (
-    <section className="mb-6 rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
-      <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="mb-2 text-xs uppercase tracking-[0.3em] text-violet-300">
-            Integration-ready MVP
-          </p>
-          <h2 className="text-3xl font-black">Connect workplace sources</h2>
-          <p className="mt-2 max-w-2xl text-sm text-slate-400">
-            For this hackathon demo, these cards simulate imports from common
-            workplace tools. In production, they can be replaced with real API
-            connectors.
-          </p>
-        </div>
-
-        <span className="w-fit rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs font-semibold text-cyan-200">
-          Mock import mode
-        </span>
-      </div>
-
-      <div className="grid items-stretch gap-4 md:grid-cols-3">
-        <IntegrationCard
-          label="Slack"
-          title="Import support signals"
-          description="Load customer issues, complaints, feature requests and sales opportunities from team channels."
-          buttonText="Import Slack messages"
-          onClick={onSlackImport}
-        />
-
-        <IntegrationCard
-          label="Zoom"
-          title="Import meeting transcript"
-          description="Load a meeting transcript and extract decisions, action items, owners and deadlines."
-          buttonText="Import Zoom transcript"
-          onClick={onZoomImport}
-        />
-
-        <IntegrationCard
-          label="Jira"
-          title="Import sprint update"
-          description="Load sprint status, blockers and team progress from project management updates."
-          buttonText="Import Jira update"
-          onClick={onJiraImport}
-        />
-      </div>
-    </section>
-  );
-}
-
-function IntegrationCard({
-  label,
-  title,
-  description,
-  buttonText,
-  onClick,
-}: {
-  label: string;
-  title: string;
-  description: string;
-  buttonText: string;
-  onClick: () => void;
-}) {
-  return (
-    <div className="group flex h-full min-h-[370px] flex-col rounded-2xl border border-white/10 bg-[#070a19]/70 p-5 transition hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-white/[0.06]">
-      <div className="mb-5 flex items-center justify-between">
-        <div className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-sm font-black text-white">
-          {label}
-        </div>
-
-        <div className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.9)]" />
-      </div>
-
-      <h3 className="text-xl font-bold">{title}</h3>
-
-      <p className="mt-3 text-sm leading-6 text-slate-400">
-        {description}
-      </p>
-
-      <div className="mt-auto pt-6">
-        <button
-          onClick={onClick}
-          className="w-full rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm font-bold text-cyan-200 transition hover:bg-cyan-300/20"
-        >
-          {buttonText}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function BusinessImpactPanel({ impact }: { impact: BusinessImpact }) {
   return (
     <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] p-5 shadow-[0_0_40px_rgba(34,211,238,0.08)]">
@@ -1263,7 +1129,7 @@ function BusinessImpactPanel({ impact }: { impact: BusinessImpact }) {
         </span>
       </div>
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2">
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <BusinessMetric
           label="Time Saved"
           value={impact.timeSavedPerManager}
@@ -1481,4 +1347,170 @@ function ValueCard({ label, value }: { label: string; value: string }) {
       </p>
     </div>
   );
+}
+
+function IntegrationHub({
+  onSlackImport,
+  onZoomImport,
+  onJiraImport,
+  onImportAll,
+}: {
+  onSlackImport: () => void;
+  onZoomImport: () => void;
+  onJiraImport: () => void;
+  onImportAll: () => void;
+}) {
+  return (
+    <section className="mb-6 rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+      <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-[0.3em] text-violet-300">
+            Integration-ready MVP
+          </p>
+          <h2 className="text-3xl font-black">Connect workplace sources</h2>
+          <p className="mt-2 max-w-2xl text-sm text-slate-400">
+            For this hackathon demo, these cards simulate imports from common
+            workplace tools. In production, they can be replaced with real API
+            connectors.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <span className="w-fit rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs font-semibold text-cyan-200">
+            Mock import mode
+          </span>
+
+          <button
+            onClick={onImportAll}
+            className="w-fit rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-xs font-bold text-emerald-200 transition hover:bg-emerald-300/20"
+          >
+            Import all sources
+          </button>
+        </div>
+      </div>
+
+      <div className="grid items-stretch gap-4 md:grid-cols-3">
+        <IntegrationCard
+          label="Slack"
+          title="Import support signals"
+          description="Load customer issues, complaints, feature requests and sales opportunities from team channels."
+          buttonText="Import Slack messages"
+          onClick={onSlackImport}
+        />
+
+        <IntegrationCard
+          label="Zoom"
+          title="Import meeting transcript"
+          description="Load a meeting transcript and extract decisions, action items, owners and deadlines."
+          buttonText="Import Zoom transcript"
+          onClick={onZoomImport}
+        />
+
+        <IntegrationCard
+          label="Jira"
+          title="Import sprint update"
+          description="Load sprint status, blockers and team progress from project management updates."
+          buttonText="Import Jira update"
+          onClick={onJiraImport}
+        />
+      </div>
+    </section>
+  );
+}
+
+function IntegrationCard({
+  label,
+  title,
+  description,
+  buttonText,
+  onClick,
+}: {
+  label: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="group flex h-full min-h-[320px] flex-col rounded-2xl border border-white/10 bg-[#070a19]/70 p-5 transition hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-white/[0.06]">
+      <div className="mb-5 flex items-center justify-between">
+        <div className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-sm font-black text-white">
+          {label}
+        </div>
+
+        <div className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.9)]" />
+      </div>
+
+      <h3 className="text-xl font-bold">{title}</h3>
+
+      <p className="mt-3 text-sm leading-6 text-slate-400">{description}</p>
+
+      <div className="mt-auto pt-6">
+        <button
+          onClick={onClick}
+          className="w-full rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm font-bold text-cyan-200 transition hover:bg-cyan-300/20"
+        >
+          {buttonText}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function buildExecutiveBrief(result: AnalysisResult) {
+  const revenueImpact = result.revenueImpact ?? fallbackRevenueImpact;
+  const businessImpact = result.businessImpact ?? fallbackBusinessImpact;
+
+  return `OpsPulse AI — Executive Brief
+
+Summary:
+${result.summary}
+
+Revenue Impact:
+- Revenue at Risk: ${revenueImpact.revenueAtRisk}
+- Expansion Pipeline: ${revenueImpact.expansionPipeline}
+- Churn Risk Signals: ${revenueImpact.churnRiskSignals}
+- Sales Opportunities: ${revenueImpact.salesOpportunities}
+
+Revenue Insights:
+${revenueImpact.insights
+  .map((insight, index) => `${index + 1}. ${insight}`)
+  .join("\n")}
+
+Estimated Business Impact:
+- Time Saved: ${businessImpact.timeSavedPerManager} per manager
+- Annual Hours Saved: ${businessImpact.annualHoursSaved}
+- Estimated Annual Savings: ${businessImpact.estimatedAnnualSavings}
+- Pipeline Surfaced: ${businessImpact.pipelineSurfaced}
+
+Business Impact Assumptions:
+${businessImpact.assumptions
+  .map((assumption, index) => `${index + 1}. ${assumption}`)
+  .join("\n")}
+
+Top Risks:
+${result.risks.map((risk, index) => `${index + 1}. ${risk}`).join("\n")}
+
+Blockers:
+${result.blockers
+  .map((blocker, index) => `${index + 1}. ${blocker}`)
+  .join("\n")}
+
+Recommended Actions:
+${result.recommendedActions
+  .map((action, index) => `${index + 1}. ${action}`)
+  .join("\n")}
+
+Action Items:
+${result.tasks
+  .map(
+    (task, index) =>
+      `${index + 1}. ${task.title} — Owner: ${task.owner}, Team: ${
+        task.team
+      }, Due: ${task.dueDate}, Priority: ${task.priority}, Status: ${
+        task.status
+      }`
+  )
+  .join("\n")}
+`;
 }
