@@ -6,9 +6,9 @@
 
 **Tagline:** From workplace noise to actionable insight.
 
-OpsPulse AI turns meeting transcripts, support messages and team updates into clear tasks, blockers, churn risks, sales opportunities, revenue insights, estimated business impact and executive briefs.
+OpsPulse AI turns meeting transcripts, support messages and team updates into clear tasks, blockers, churn risks, sales opportunities, revenue insights, estimated business impact, a business case calculator and executive briefs.
 
-It helps teams understand what is happening across the company, what is blocked, what could hurt revenue and what management should do next.
+It helps teams understand what is happening across the company, what is blocked, what could hurt revenue, how much time could be saved and what management should do next.
 
 ---
 
@@ -29,6 +29,7 @@ As a result, managers often miss:
 - sales opportunities
 - revenue-impacting issues
 - repeated operational problems
+- measurable business value hidden in daily work
 
 This creates operational noise, slows down decision-making and can cause teams to miss both risks and revenue opportunities.
 
@@ -52,6 +53,7 @@ The app extracts:
 - expansion opportunities
 - churn risk signals
 - estimated business impact
+- business value calculations
 - recommended management actions
 - ready-to-copy executive brief
 
@@ -72,6 +74,7 @@ The dashboard helps management answer:
 - Which issues could create churn?
 - Which messages contain sales opportunities?
 - What is the estimated business impact?
+- What is the estimated total business value?
 - What should leadership do next?
 
 ---
@@ -84,8 +87,9 @@ The dashboard helps management answer:
 4. Click **Generate OpsPulse**.
 5. View the management dashboard.
 6. Review revenue impact and estimated business impact.
-7. Review team load, risks and recommended actions.
-8. Copy the auto-generated executive brief.
+7. Use the **Business Case Calculator** to adjust assumptions and estimate total business value.
+8. Review team load, risks and recommended actions.
+9. Copy the auto-generated executive brief.
 
 ---
 
@@ -146,6 +150,28 @@ Example demo assumptions:
 
 These numbers are framed as estimated demo projections, not guaranteed results.
 
+### Business Case Calculator
+
+OpsPulse AI includes an interactive business case calculator that helps teams estimate the value of operational intelligence.
+
+Users can adjust assumptions such as:
+
+- number of managers
+- hours saved per manager per week
+- hourly management cost
+- pipeline surfaced
+- revenue at risk detected
+
+The calculator then estimates:
+
+- annual hours saved
+- estimated annual productivity savings
+- pipeline surfaced
+- revenue protected
+- total estimated business value
+
+This directly connects the product to time savings, cost reduction and revenue enablement.
+
 ### Executive Brief
 
 Generates a ready-to-copy management report that can be shared with leadership or the team.
@@ -197,6 +223,44 @@ For the hackathon MVP, OpsPulse AI supports:
 In a production environment, companies would not need to manually copy conversations. OpsPulse AI would connect to approved workplace systems such as Slack, Zoom, Jira, Zendesk, Intercom or HubSpot.
 
 Companies would choose which channels, projects or ticket queues to analyze. OpsPulse AI would then automatically process approved inputs, extract operational and revenue signals, and update the dashboard on a daily or weekly basis.
+
+---
+
+## Business Impact
+
+OpsPulse AI is designed to create business value in three ways:
+
+### 1. Save Time
+
+By automatically turning meetings, support messages and team updates into structured summaries, tasks and executive briefs, OpsPulse AI reduces manual reporting and follow-up work.
+
+Example demo scenario:
+
+```text
+10 managers × 10 hours saved per week × 52 weeks = 5,200 hours saved per year
+```
+
+### 2. Cut Costs
+
+Using an estimated fully loaded management cost of €50/hour:
+
+```text
+5,200 hours × €50/hour = €260,000 estimated annual productivity savings
+```
+
+### 3. Generate Value
+
+OpsPulse AI surfaces revenue signals hidden in customer messages and team updates.
+
+Example demo scenario:
+
+```text
+€50,000 potential expansion pipeline surfaced
+€18,000 revenue at risk detected
+€328,000 total estimated value
+```
+
+These numbers are demo assumptions and are not guaranteed outcomes. They show how the product can connect operational clarity to measurable business impact.
 
 ---
 
@@ -274,6 +338,16 @@ src/app/api/analyze/route.ts
 
 ---
 
+## Privacy & Ethics
+
+OpsPulse AI is not designed for employee surveillance.
+
+It analyzes approved business inputs such as meeting transcripts, support messages and team updates to surface operational and revenue signals.
+
+In a production environment, companies should configure exactly which channels, projects and data sources are allowed to be analyzed.
+
+---
+
 ## Hackathon Positioning
 
 OpsPulse AI is an operational and revenue intelligence MVP.
@@ -286,7 +360,7 @@ The goal is to help teams reduce operational chaos, detect blockers earlier, sur
 
 ## One-Sentence Pitch
 
-OpsPulse AI turns meetings, support messages and team updates into tasks, blockers, churn risks, sales opportunities, estimated business impact and executive insights.
+OpsPulse AI turns meetings, support messages and team updates into tasks, blockers, churn risks, sales opportunities, business value estimates and executive insights.
 
 ---
 
@@ -303,6 +377,8 @@ OpsPulse AI turns meetings, support messages and team updates into tasks, blocke
 - PDF export
 - Push tasks to Jira, Linear or Asana
 - Revenue impact scoring based on real customer value
+- ROI calculator connected to real company metrics
+- Business impact reports by team or department
 - Automated weekly executive reports
 
 ---
