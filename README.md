@@ -12,6 +12,22 @@ It helps teams understand what is happening across the company, what is blocked,
 
 ---
 
+## Screenshots
+
+### Landing View
+![OpsPulse AI Landing View](public/screenshots/hero.png)
+
+### Management Dashboard
+![Management Dashboard](public/screenshots/dashboard.png)
+
+### Business Case Calculator
+![Business Case Calculator](public/screenshots/business-case-calculator.png)
+
+### Executive Brief
+![Executive Brief](public/screenshots/executive-brief.png)
+
+---
+
 ## Problem
 
 Modern teams generate important business signals every day across meetings, support conversations, customer feedback and team updates.
